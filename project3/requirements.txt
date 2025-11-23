@@ -3,4 +3,6 @@ google-generativeai
 Pillow
 PyPDF2
 python-dotenv
-fpdf 
+fpdf2
+requests
+reportlab
