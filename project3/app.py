@@ -11,6 +11,7 @@ from reportlab.lib import colors
 from io import BytesIO
 import re
 from datetime import datetime
+import PyPDF2
 
 # -----------------------
 # Setup
@@ -79,8 +80,36 @@ This AI analyzes privacy policies through posthumanist theory:
 
 ⚠️ *Philosophical analysis, not legal advice.*
 
-Version **1.0**
+Version **1.1**
 """)
+
+# -----------------------
+# File Processing Functions
+# -----------------------
+def extract_text_from_pdf(file):
+    """Extract text from uploaded PDF file"""
+    try:
+        pdf_reader = PyPDF2.PdfReader(file)
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
+        return text.strip()
+    except Exception as e:
+        st.error(f"Error reading PDF: {str(e)}")
+        return None
+
+def process_uploaded_file(uploaded_file):
+    """Process uploaded PDF file"""
+    if uploaded_file is None:
+        return None
+    
+    file_extension = uploaded_file.name.split('.')[-1].lower()
+    
+    if file_extension == 'pdf':
+        return extract_text_from_pdf(uploaded_file)
+    else:
+        st.error(f"Unsupported file type: {file_extension}. Please upload a PDF file.")
+        return None
 
 # -----------------------
 # Main UI
@@ -91,13 +120,48 @@ st.markdown(
         🔒 Posthumanist Privacy Risk Analyzer
     </h1>
     <p style='text-align: center; font-size: 18px;'>
-        Paste any privacy-policy text or app permissions for analysis.
+        Paste any privacy-policy text or upload a file for analysis.
     </p>
     """,
     unsafe_allow_html=True
 )
 
-user_input = st.text_area("Enter your text here:", height=200)
+# Create tabs for different input methods
+tab1, tab2 = st.tabs(["📝 Paste Text", "📁 Upload File"])
+
+user_text = None
+
+with tab1:
+    user_input = st.text_area("Enter your privacy policy or app permissions text here:", height=250, key="text_input")
+    if user_input.strip():
+        user_text = user_input
+
+with tab2:
+    uploaded_file = st.file_uploader(
+        "Upload a privacy policy document (PDF only)",
+        type=['pdf'],
+        help="Only PDF files are supported"
+    )
+    
+    if uploaded_file is not None:
+        st.success(f"✅ File uploaded: {uploaded_file.name}")
+        
+        # Show file info
+        file_size = uploaded_file.size / 1024  # Convert to KB
+        st.info(f"📊 File size: {file_size:.2f} KB")
+        
+        # Extract text from file
+        with st.spinner("Extracting text from PDF..."):
+            extracted_text = process_uploaded_file(uploaded_file)
+            
+            if extracted_text:
+                user_text = extracted_text
+                
+                # Show preview of extracted text
+                with st.expander("👁️ Preview extracted text"):
+                    preview_length = min(len(extracted_text), 500)
+                    st.text(extracted_text[:preview_length] + ("..." if len(extracted_text) > 500 else ""))
+                    st.caption(f"Total characters: {len(extracted_text)}")
 
 # Placeholder for the analysis result
 analysis_output = None
@@ -106,12 +170,12 @@ analysis_output = None
 # Analyze button
 # -----------------------
 if st.button("Analyze", use_container_width=True):
-    if not user_input.strip():
-        st.warning("Please enter some text.")
+    if not user_text or not user_text.strip():
+        st.warning("⚠️ Please enter text or upload a file before analyzing.")
     else:
         # Show spinner while waiting for API response
-        with st.spinner("Analyzing, please wait..."):
-            response = model.generate_content(user_input)
+        with st.spinner("🔍 Analyzing privacy policy, please wait..."):
+            response = model.generate_content(user_text)
             analysis_output = response.text
 
         st.markdown("### 🔍 Analysis Result")
