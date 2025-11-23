@@ -2,7 +2,11 @@ import streamlit as st
 import google.generativeai as genai
 import os
 from dotenv import load_dotenv
+from fpdf import FPDF
 
+# -----------------------
+# Setup
+# -----------------------
 load_dotenv()
 
 api_key = os.getenv("GOOGLE_API_KEY")
@@ -27,23 +31,107 @@ Output:
 4. Recommendation
 """
 
-# Create model with system prompt
 model = genai.GenerativeModel(
     "gemini-2.5-flash-lite",
     system_instruction=SYSTEM_PROMPT
 )
 
-st.set_page_config(page_title="Posthumanist Privacy Agent", page_icon="🔒")
+# -----------------------
+# Streamlit page config
+# -----------------------
+st.set_page_config(
+    page_title="Posthumanist Privacy Agent",
+    page_icon="🔒",
+    layout="centered",
+)
 
-st.title("🔒 Posthumanist Privacy Risk Analyzer")
-st.write("Paste app permissions or privacy-policy text below.")
+# -----------------------
+# Sidebar content
+# -----------------------
+with st.sidebar:
+    st.title("📘 About This Agent")
+    st.markdown("""
+This AI analyzes privacy policies through posthumanist theory:
 
-user_input = st.text_area("Enter the text here:")
+- **Zuboff** – surveillance capitalism  
+- **Floridi** – infosphere ethics  
+- **Braidotti** – posthuman subjectivity  
+- **Hayles** – human–machine entanglement  
+- **Yuk Hui** – technodiversity  
 
-if st.button("Analyze"):
+---
+
+### 🔢 Scoring Model  
+- **Data Sensitivity – 40%**  
+- **Autonomy Impact – 30%**  
+- **Surveillance Capitalism – 30%**
+
+---
+
+⚠️ *Philosophical analysis, not legal advice.*
+
+Version **1.0**
+""")
+
+# -----------------------
+# Main UI
+# -----------------------
+st.markdown(
+    """
+    <h1 style='text-align: center; font-size: 36px;'>
+        🔒 Posthumanist Privacy Risk Analyzer
+    </h1>
+    <p style='text-align: center; font-size: 18px;'>
+        Paste any privacy-policy text or app permissions for analysis.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+user_input = st.text_area("Enter your text here:", height=200)
+
+# Placeholder for the analysis result
+analysis_output = None
+
+# -----------------------
+# Analyze button
+# -----------------------
+if st.button("Analyze", use_container_width=True):
     if not user_input.strip():
         st.warning("Please enter some text.")
     else:
         response = model.generate_content(user_input)
+        analysis_output = response.text
+
         st.markdown("### 🔍 Analysis Result")
-        st.write(response.text)
+        st.write(analysis_output)
+
+# -----------------------
+# PDF Download Function
+# -----------------------
+def generate_pdf(text):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+    pdf.set_font("Arial", size=12)
+
+    for line in text.split("\n"):
+        pdf.multi_cell(0, 10, line)
+
+    filename = "privacy_analysis.pdf"
+    pdf.output(filename)
+    return filename
+
+# -----------------------
+# Show download button if analysis exists
+# -----------------------
+if "analysis_output" in locals() and analysis_output:
+    pdf_file = generate_pdf(analysis_output)
+
+    with open(pdf_file, "rb") as f:
+        st.download_button(
+            label="📄 Download Analysis as PDF",
+            data=f,
+            file_name="privacy_analysis.pdf",
+            mime="application/pdf",
+        )
