@@ -17,7 +17,8 @@ from datetime import datetime
 # -----------------------
 load_dotenv()
 
-api_key = os.getenv("GOOGLE_API_KEY")
+#api_key = os.getenv("GOOGLE_API_KEY")
+api_key = st.secrets["general"]["GOOGLE_API_KEY"]
 genai.configure(api_key=api_key)
 
 SYSTEM_PROMPT = """
@@ -108,11 +109,14 @@ if st.button("Analyze", use_container_width=True):
     if not user_input.strip():
         st.warning("Please enter some text.")
     else:
-        response = model.generate_content(user_input)
-        analysis_output = response.text
+        # Show spinner while waiting for API response
+        with st.spinner("Analyzing, please wait..."):
+            response = model.generate_content(user_input)
+            analysis_output = response.text
 
         st.markdown("### 🔍 Analysis Result")
         st.write(analysis_output)
+
 
 # -----------------------
 # Enhanced PDF Download Function
