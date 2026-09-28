@@ -35,7 +35,7 @@ The agent's analysis is constrained to concepts from contemporary information et
 | Component | Technology |
 |---|---|
 | Interface | Streamlit |
-| LLM | Google Gemini (`gemini-2.5-flash-lite`) with role-specific system prompts |
+| LLM | Google Gemini (`gemini-3.5-flash-lite`) with role-specific system prompts |
 | PDF input | PyPDF2 |
 | PDF reports | ReportLab |
 | Config | python-dotenv, Streamlit secrets |
