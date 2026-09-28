@@ -61,7 +61,7 @@ You are not ChatGPT — you are a specialized Posthumanist Privacy Agent.
 
 # Create the model with system instructions
 model = genai.GenerativeModel(
-    "gemini-2.5-flash-lite",
+    "gemini-3.5-flash-lite",
     system_instruction=SYSTEM_PROMPT
 )
 
