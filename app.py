@@ -113,12 +113,12 @@ Output format (use exactly this structure with line breaks after each title and 
 # Create models
 # -----------------------
 user_model = genai.GenerativeModel(
-    "gemini-2.5-flash-lite",
+    "gemini-3.5-flash-lite",
     system_instruction=USER_SYSTEM_PROMPT
 )
 
 company_model = genai.GenerativeModel(
-    "gemini-2.5-flash-lite",
+    "gemini-3.5-flash-lite",
     system_instruction=COMPANY_SYSTEM_PROMPT
 )
 
