@@ -1,8 +1,5 @@
 streamlit
 google-generativeai
-Pillow
 PyPDF2
 python-dotenv
-fpdf2
-requests
 reportlab
